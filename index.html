@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>つくみアプリ</title>
+<meta name="description" content="津久見市 専用アプリ（仮称：つくみアプリ）のサンプル版です。表示内容はすべてサンプルです。">
+<meta name="theme-color" content="#0d5c73">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="つくみ">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+<style>
+/* Layout: 左に要件ガイド、右にスマホ実寸のアプリ。スマホ幅ではアプリのみ全画面表示 */
+:root{
+  --sea:#0d5c73;        /* 津久見湾の深い青緑 */
+  --sea-soft:#e3f0f3;
+  --mikan:#e8821e;      /* 津久見みかん */
+  --mikan-soft:#fdf0e1;
+  --stone:#f3f4f1;      /* 石灰石の白 */
+  --card:#ffffff;
+  --ink:#1c2a2f;
+  --ink-2:#4d5d63;
+  --line:#d5dddd;
+  --ok:#1f8a4c; --ok-soft:#e2f4ea;
+  --warn:#b86e00; --warn-soft:#fff3d6;
+  --bad:#c0362c; --bad-soft:#fde6e3;
+  --frame:#1b2326;
+  --f-disp:"Zen Maru Gothic","Hiragino Maru Gothic ProN","BIZ UDPGothic",sans-serif;
+  --f-body:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  --fs:16px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --sea:#5fb6cc;--sea-soft:#13323b;--mikan:#f39a43;--mikan-soft:#3a2a17;--stone:#11181a;--card:#1a2427;
+  --ink:#e8eff0;--ink-2:#a6b5b9;--line:#2e3c40;--ok:#5cc98a;--ok-soft:#173527;--warn:#f0b24a;--warn-soft:#3a2e14;
+  --bad:#f07a6f;--bad-soft:#3d1c19;--frame:#000;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --sea:#5fb6cc;--sea-soft:#13323b;--mikan:#f39a43;--mikan-soft:#3a2a17;--stone:#11181a;--card:#1a2427;
+  --ink:#e8eff0;--ink-2:#a6b5b9;--line:#2e3c40;--ok:#5cc98a;--ok-soft:#173527;--warn:#f0b24a;--warn-soft:#3a2e14;
+  --bad:#f07a6f;--bad-soft:#3d1c19;--frame:#000;color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--stone);color:var(--ink);font-family:var(--f-body);margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--mikan);outline-offset:2px}
+
+.stage{display:flex;gap:40px;justify-content:center;align-items:flex-start;padding:32px 16px;max-width:1180px;margin:0 auto}
+.guide{flex:1 1 360px;max-width:440px;min-width:0;position:sticky;top:24px}
+.guide h1{font-family:var(--f-disp);font-weight:900;font-size:28px;margin:0 0 4px;color:var(--sea);text-wrap:balance}
+.guide .sub{color:var(--ink-2);font-size:14px;line-height:1.7;margin:0 0 20px}
+.guide h2{font-size:12px;letter-spacing:.12em;color:var(--ink-2);margin:20px 0 8px;font-weight:700}
+.req{display:grid;gap:4px;list-style:none;padding:0;margin:0}
+.req button{display:grid;grid-template-columns:52px 1fr auto;gap:8px;align-items:center;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:7px 8px;font-size:14px}
+.req button:hover{background:var(--sea-soft)}
+.req .id{font-variant-numeric:tabular-nums;font-size:12px;color:var(--sea);font-weight:700}
+.ph{font-size:11px;padding:2px 7px;border-radius:99px;font-weight:700}
+.ph1{background:var(--sea);color:var(--card)}.ph2{background:var(--mikan-soft);color:var(--mikan)}
+.demo-btns{display:flex;flex-wrap:wrap;gap:8px}
+.gbtn{border:1.5px solid var(--sea);background:var(--card);color:var(--sea);border-radius:10px;padding:9px 14px;font-weight:700;font-size:14px}
+.gbtn.alert{border-color:var(--bad);color:var(--bad)}
+.note{font-size:12px;color:var(--ink-2);line-height:1.7;margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+
+/* phone */
+.phone{flex:0 0 auto;width:392px;height:820px;border-radius:46px;background:var(--frame);padding:12px;box-shadow:0 30px 60px -20px rgba(13,40,50,.45)}
+.screen{position:relative;width:100%;height:100%;border-radius:36px;overflow:hidden;background:var(--stone);display:flex;flex-direction:column;font-size:var(--fs)}
+@media (max-width:860px){
+  .stage{padding:0;display:block}
+  .guide{display:none}
+  .phone{width:100%;height:100vh;height:100dvh;border-radius:0;padding:0;box-shadow:none;background:var(--stone)}
+  .screen{border-radius:0}
+}
+
+.topbar{background:var(--sea);color:#fff;padding:14px 16px 12px;display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.topbar .logo{font-family:var(--f-disp);font-weight:900;font-size:1.25em;letter-spacing:.02em}
+.topbar .logo small{display:block;font-size:.55em;font-weight:500;opacity:.85;letter-spacing:.08em}
+.topbar .sp{flex:1}
+.ib{background:rgba(255,255,255,.16);border:0;color:#fff;border-radius:10px;padding:7px 10px;font-size:.8em;font-weight:700;min-height:40px}
+.sample{background:var(--mikan-soft);color:var(--mikan);font-size:.7em;text-align:center;padding:4px;font-weight:700;flex:0 0 auto}
+
+.view{flex:1;overflow-y:auto;padding:14px 14px 24px;display:none}
+.view.on{display:block}
+.vt{font-family:var(--f-disp);font-weight:900;font-size:1.35em;margin:2px 2px 12px;color:var(--ink)}
+.stack{display:grid;gap:12px}
+.card{background:var(--card);border-radius:16px;padding:14px;border:1px solid var(--line)}
+.card h3{margin:0 0 8px;font-size:.95em;color:var(--ink-2);font-weight:700;display:flex;align-items:center;gap:6px}
+.big{font-family:var(--f-disp);font-weight:900;font-size:1.35em;line-height:1.35}
+.muted{color:var(--ink-2);font-size:.85em;line-height:1.6}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:4px 12px;font-weight:700;font-size:.85em}
+.p-ok{background:var(--ok-soft);color:var(--ok)}.p-warn{background:var(--warn-soft);color:var(--warn)}.p-bad{background:var(--bad-soft);color:var(--bad)}.p-sea{background:var(--sea-soft);color:var(--sea)}
+.dot{width:9px;height:9px;border-radius:50%;background:currentColor}
+.row{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 6px;display:grid;justify-items:center;gap:6px;font-weight:700;font-size:.85em;min-height:88px;text-align:center}
+.tile svg{width:30px;height:30px;stroke:var(--sea);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.alertbar{background:var(--warn-soft);border:1.5px solid var(--warn);color:var(--ink);border-radius:14px;padding:12px 14px;display:grid;gap:4px}
+.alertbar b{color:var(--warn)}
+.list{display:grid}
+.li{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line)}
+.li:first-child{border-top:0;padding-top:2px}
+.li .t{font-size:.75em;color:var(--ink-2);font-variant-numeric:tabular-nums;min-width:44px;padding-top:2px}
+.li .b{flex:1;min-width:0;line-height:1.55;font-size:.92em}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:14px;font-weight:700;background:var(--sea);color:#fff;min-height:52px;font-size:1em}
+.btn.ghost{background:var(--sea-soft);color:var(--sea)}
+.btn.mk{background:var(--mikan);color:#fff}
+.seg{display:flex;background:var(--sea-soft);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;border:0;background:none;border-radius:9px;padding:9px 4px;font-weight:700;color:var(--sea);font-size:.85em;min-height:42px}
+.seg button[aria-pressed="true"]{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+select,input[type=search],input[type=time]{width:100%;font:inherit;font-size:1em;padding:12px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);min-height:50px}
+label.lb{display:block;font-weight:700;font-size:.85em;margin:0 0 6px;color:var(--ink-2)}
+
+/* calendar */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;font-variant-numeric:tabular-nums}
+.cal .h{font-size:.7em;text-align:center;color:var(--ink-2);font-weight:700;padding:4px 0}
+.cal .h.sun{color:var(--bad)}.cal .h.sat{color:var(--sea)}
+.cal .d{border-radius:8px;min-height:46px;padding:3px 2px;text-align:center;font-size:.8em;background:var(--stone)}
+.cal .d.today{outline:2px solid var(--mikan)}
+.cal .d i{display:block;font-style:normal;font-size:.68em;font-weight:700;border-radius:5px;margin-top:3px;padding:1px 0}
+.g-burn{background:var(--bad-soft);color:var(--bad)}.g-pla{background:var(--sea-soft);color:var(--sea)}.g-can{background:var(--warn-soft);color:var(--warn)}.g-paper{background:var(--ok-soft);color:var(--ok)}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:.75em}
+.legend span{padding:3px 8px;border-radius:6px;font-weight:700;white-space:nowrap}
+
+/* tabs */
+.tabbar{flex:0 0 auto;display:grid;grid-template-columns:repeat(5,1fr);background:var(--card);border-top:1px solid var(--line);padding:6px 4px calc(8px + env(safe-area-inset-bottom,0px))}
+.tab{border:0;background:none;display:grid;justify-items:center;gap:3px;padding:6px 2px;font-size:.7em;font-weight:700;color:var(--ink-2);border-radius:10px;min-height:56px}
+.tab svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-current="true"]{color:var(--sea);background:var(--sea-soft)}
+
+/* coupons */
+.cp{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;text-align:left;width:100%}
+.cp .ic{width:72px;height:72px;border-radius:12px;display:grid;place-items:center;font-family:var(--f-disp);font-weight:900;font-size:1.2em;color:#fff}
+.cp .nm{font-weight:700;line-height:1.4}
+.cp .of{color:var(--mikan);font-weight:700;font-size:1.05em;font-family:var(--f-disp)}
+.cp.used{opacity:.5}
+
+/* overlays */
+.sheet{position:absolute;inset:0;background:rgba(10,25,30,.55);display:flex;align-items:flex-end;z-index:20}
+.sheet .in{background:var(--card);width:100%;border-radius:22px 22px 0 0;padding:20px 16px 28px;max-height:88%;overflow-y:auto;display:grid;gap:12px}
+.toast{position:absolute;left:10px;right:10px;top:10px;z-index:30;background:var(--card);border-radius:18px;padding:12px 14px;box-shadow:0 12px 30px rgba(0,0,0,.3);display:grid;grid-template-columns:40px 1fr;gap:10px;align-items:start;border-left:6px solid var(--bad);animation:drop .35s ease-out}
+.toast .ap{width:40px;height:40px;border-radius:10px;background:var(--sea);color:#fff;display:grid;place-items:center;font-family:var(--f-disp);font-weight:900;font-size:.85em}
+@keyframes drop{from{transform:translateY(-120%)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.toast{animation:none}}
+
+.map{width:100%;height:auto;border-radius:12px;background:var(--sea-soft);display:block}
+.tt{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.9em}
+.tt th,.tt td{padding:8px 6px;border-top:1px solid var(--line);text-align:left}
+.tt th{font-size:.75em;color:var(--ink-2)}
+.tt tr.next td{background:var(--mikan-soft);font-weight:700}
+.tel{font-variant-numeric:tabular-nums;font-weight:700;font-size:1.1em;color:var(--sea);user-select:all}
+.menu{display:grid;gap:8px}
+.mi{display:grid;grid-template-columns:44px 1fr 14px;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:left;width:100%;min-height:64px}
+.mi .mk{width:44px;height:44px;border-radius:12px;background:var(--sea-soft);display:grid;place-items:center}
+.mi .mk svg{width:24px;height:24px;stroke:var(--sea);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mi b{display:block}.mi span{font-size:.78em;color:var(--ink-2)}
+.chev{width:10px;height:10px;border-right:2px solid var(--ink-2);border-top:2px solid var(--ink-2);transform:rotate(45deg)}
+.back{border:0;background:none;color:var(--sea);font-weight:700;padding:6px 0;margin-bottom:6px;min-height:40px}
+.res{display:grid;gap:8px}
+.res .r{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:10px;background:var(--stone);align-items:center}
+.feed{display:grid;gap:10px}
+.feed .f{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}
+.src{font-size:.68em;font-weight:700;padding:3px 7px;border-radius:6px;background:var(--sea-soft);color:var(--sea);white-space:nowrap}
+</style>
+
+<style>
+/* アプリとして起動したとき（ホーム画面から）の調整 */
+html,body{height:100%}
+@media (max-width:860px){
+  .stage{height:100%}
+  .phone{height:100%}
+  .topbar{padding-top:calc(14px + env(safe-area-inset-top,0px))}
+}
+@media (display-mode: standalone){
+  body{overscroll-behavior:none}
+  .stage{padding:0;display:block;max-width:none;height:100%}
+  .guide{display:none}
+  .phone{width:100%;height:100%;border-radius:0;padding:0;box-shadow:none;background:var(--stone)}
+  .screen{border-radius:0}
+  .topbar{padding-top:calc(14px + env(safe-area-inset-top,0px))}
+  .sample{display:none}
+}
+.install{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.8}
+.install b{color:var(--sea)}
+</style>
+</head>
+<body>
+<div class="stage">
+  <aside class="guide">
+    <h1>つくみアプリ モック</h1>
+    <p class="sub">「津久見市 専用アプリ 要件定義書 版1.0（2026年10月3日）」の Phase 1〜2 機能を、操作できる画面に落としたものです。表示中の運航状況・収集日・店舗・時刻はすべて説明用のサンプルです。</p>
+
+    <h2>要件IDから画面を開く</h2>
+    <ul class="req" id="reqList"></ul>
+
+    <h2>動作デモ</h2>
+    <div class="demo-btns">
+      <button class="gbtn alert" id="demoAlert">緊急通知を受信（F-101）</button>
+      <button class="gbtn" id="demoFerry">欠航通知を受信（F-104）</button>
+      <button class="gbtn" id="demoGarbage">前夜のごみ通知（F-102）</button>
+    </div>
+
+
+    <h2>スマホのホーム画面に置く</h2>
+    <div class="install">
+      <b>iPhone</b>：Safariでこのページを開き、共有ボタン → 「ホーム画面に追加」<br>
+      <b>Android</b>：Chromeでこのページを開き、右上のメニュー → 「ホーム画面に追加」または「アプリをインストール」<br>
+      追加したアイコンから開くと、ブラウザの枠なしで全画面表示になります。
+    </div>
+
+    <p class="note">シニア配慮（6-3）として、UD書体（BIZ UDPゴシック）、文字サイズ3段階、主要機能を3タップ以内、アイコンに日本語ラベル併記、電話番号の常時表示を反映しています。右上の「文字」「言語」から切り替えられます。</p>
+  </aside>
+
+  <div class="phone">
+    <div class="screen" id="screen">
+      <header class="topbar">
+        <div class="logo">つくみアプリ<small>TSUKUMI CITY</small></div>
+        <div class="sp"></div>
+        <button class="ib" id="btnFont" aria-label="文字サイズを切り替え">文字 標準</button>
+        <button class="ib" id="btnLang" aria-label="言語を切り替え">日本語</button>
+      </header>
+      <div class="sample">モック表示：内容はすべてサンプルです</div>
+
+      <!-- HOME -->
+      <section class="view on" id="v-home" aria-label="ホーム">
+        <div class="stack">
+          <div>
+            <div class="muted" id="today">2026年10月3日（土）</div>
+            <div class="vt" style="margin-bottom:0" data-i18n="greet">おはようございます</div>
+          </div>
+
+          <div class="alertbar" id="homeAlert">
+            <div><b>大雨注意報</b>　津久見市全域</div>
+            <div class="muted">10月3日 6:12 発表。土砂災害に注意してください。</div>
+          </div>
+
+          <button class="card" style="text-align:left;width:100%" data-go="ferry">
+            <h3 data-i18n="ferryToday">本日の保戸島航路</h3>
+            <div class="row">
+              <div class="big" id="ferryState">通常運航</div>
+              <span class="pill p-ok" id="ferryPill"><span class="dot"></span>運航中</span>
+            </div>
+            <div class="muted" style="margin-top:6px">次の便　津久見港 <b id="nextShip">10:30</b> 発 → 保戸島 10:55 着</div>
+          </button>
+
+          <button class="card" style="text-align:left;width:100%" data-go="gomi">
+            <h3 data-i18n="gomiTomorrow">あすのごみ（中心部）</h3>
+            <div class="row">
+              <div class="big">あす（日）は収集なし</div>
+            </div>
+            <div class="muted" style="margin-top:6px">次は 10月5日（月）燃やせるごみ。前夜20時にお知らせします。</div>
+          </button>
+
+          <div class="tiles">
+            <button class="tile" data-go="bousai"><svg viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v.5"/></svg><span data-i18n="tBousai">防災・避難所</span></button>
+            <button class="tile" data-go="gomi"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span data-i18n="tGomi">ごみ</span></button>
+            <button class="tile" data-go="ferry"><svg viewBox="0 0 24 24"><path d="M3 17c3 2 6 2 9 0s6-2 9 0M5 14l1-5h12l1 5M9 9V5h6v4"/></svg><span data-i18n="tFerry">船・バス</span></button>
+            <button class="tile" data-go="doctor"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg><span data-i18n="tDoctor">当番医</span></button>
+            <button class="tile" data-go="coupon"><svg viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 0 0 4v4h18v-4a2 2 0 0 1 0-4V4H3z" transform="translate(0 2)"/><path d="M9 6v12" stroke-dasharray="2 2"/></svg><span data-i18n="tCoupon">クーポン</span></button>
+            <button class="tile" data-go="kids"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3"/><path d="M6 21v-3a6 6 0 0 1 12 0v3"/></svg><span data-i18n="tKids">子育て</span></button>
+          </div>
+
+          <div class="card">
+            <h3 data-i18n="news">お知らせ</h3>
+            <div class="list">
+              <div class="li"><div class="t">10/02</div><div class="b">市民健康ウォーキング（10月18日）参加者募集。健康マイレージ対象です</div></div>
+              <div class="li"><div class="t">10/01</div><div class="b">インフルエンザ予防接種の費用助成が始まりました</div></div>
+              <div class="li"><div class="t">09/29</div><div class="b">四浦地区で道路工事による片側交互通行（10月10日まで）</div></div>
+            </div>
+          </div>
+
+          <button class="card" style="text-align:left;width:100%;background:var(--mikan-soft);border-color:transparent" data-go="coupon">
+            <h3 style="color:var(--mikan)">今週のクーポン　12店舗</h3>
+            <div class="big">港の食堂 しおさい<br>ひゅうが丼 100円引き</div>
+          </button>
+        </div>
+      </section>
+
+      <!-- BOUSAI -->
+      <section class="view" id="v-bousai" aria-label="防災">
+        <div class="vt">防災・避難所</div>
+        <div class="stack">
+          <div class="alertbar">
+            <div><b>大雨注意報</b>　発表中</div>
+            <div class="muted">避難情報は出ていません（10月3日 6:12 現在）</div>
+          </div>
+
+          <div class="card">
+            <h3>ハザードマップ</h3>
+            <div class="seg" role="group" aria-label="災害の種類">
+              <button aria-pressed="true" data-hz="flood">洪水</button>
+              <button aria-pressed="false" data-hz="slide">土砂</button>
+              <button aria-pressed="false" data-hz="tsunami">津波</button>
+            </div>
+            <svg class="map" viewBox="0 0 340 220" role="img" aria-label="ハザードマップの模式図" style="margin-top:10px">
+              <rect width="340" height="220" fill="var(--sea-soft)"/>
+              <path d="M0 0H240C228 40 212 70 200 88 186 110 170 118 150 128 120 142 100 160 92 220H0Z" fill="var(--card)" stroke="var(--line)"/>
+              <path d="M270 150c14-6 30-4 36 8 6 12-4 26-20 28-16 2-30-8-28-20 1-8 5-13 12-16z" fill="var(--card)" stroke="var(--line)"/>
+              <g id="hzLayer"></g>
+              <circle cx="120" cy="70" r="8" fill="var(--ok)"/><text x="132" y="74" font-size="11" fill="var(--ink)">市民会館</text>
+              <circle cx="60" cy="140" r="8" fill="var(--ok)"/><text x="72" y="144" font-size="11" fill="var(--ink)">第一小学校</text>
+              <circle cx="288" cy="166" r="8" fill="var(--ok)"/><text x="230" y="204" font-size="11" fill="var(--ink)">保戸島 公民館</text>
+              <circle cx="168" cy="40" r="7" fill="var(--mikan)" stroke="#fff" stroke-width="3"/><text x="180" y="44" font-size="11" fill="var(--ink)">現在地</text>
+            </svg>
+            <div class="muted" id="hzNote" style="margin-top:8px">色が濃い場所ほど浸水が深い想定です。</div>
+          </div>
+
+          <div class="card">
+            <div class="row"><h3 style="margin:0">近くの避難所</h3><span class="pill p-sea">通信なしでも表示</span></div>
+            <div class="list" style="margin-top:6px">
+              <div class="li"><div class="b"><b>津久見市民会館</b><br><span class="muted">現在地から約450m・徒歩6分　洪水○ 土砂○ 津波○</span></div><span class="pill p-ok">開設なし</span></div>
+              <div class="li"><div class="b"><b>津久見第一小学校 体育館</b><br><span class="muted">約900m・徒歩12分　洪水△ 土砂○ 津波○</span></div><span class="pill p-ok">開設なし</span></div>
+              <div class="li"><div class="b"><b>保戸島 公民館</b><br><span class="muted">保戸島地区の指定避難所</span></div><span class="pill p-ok">開設なし</span></div>
+            </div>
+            <button class="btn ghost" style="margin-top:8px">市民会館までの道順を見る</button>
+          </div>
+
+          <div class="card">
+            <h3>通知を受け取る地区</h3>
+            <div class="muted" style="margin-bottom:8px">選んだ地区の避難情報だけが届きます（複数選択可）</div>
+            <div class="seg" role="group" aria-label="通知地区" style="flex-wrap:wrap">
+              <button aria-pressed="true" data-toggle>中心部</button><button aria-pressed="false" data-toggle>四浦</button><button aria-pressed="true" data-toggle>保戸島</button><button aria-pressed="false" data-toggle>日代</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- GOMI -->
+      <section class="view" id="v-gomi" aria-label="ごみ">
+        <div class="vt">ごみ収集・分別</div>
+        <div class="stack">
+          <div>
+            <label class="lb" for="district">お住まいの地区</label>
+            <select id="district">
+              <option value="center">中心部（千怒・宮本町ほか）</option>
+              <option value="aoe">青江</option>
+              <option value="hishiro">日代</option>
+              <option value="yotsuura">四浦</option>
+              <option value="hotojima">保戸島</option>
+            </select>
+          </div>
+
+          <div class="card">
+            <label class="lb" for="gq">何ごみか調べる</label>
+            <input type="search" id="gq" placeholder="例：でんち、ペットボトル、スプレー" autocomplete="off">
+            <div class="res" id="gres" style="margin-top:10px"></div>
+          </div>
+
+          <div class="card">
+            <div class="row" style="margin-bottom:8px"><h3 style="margin:0">2026年10月</h3><span class="muted" id="calDist">中心部</span></div>
+            <div class="cal" id="cal"></div>
+            <div class="legend" style="margin-top:10px">
+              <span class="g-burn">燃やせる</span><span class="g-pla">プラ</span><span class="g-can">かん・びん</span><span class="g-paper">古紙</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>前の晩にお知らせ</h3>
+            <div class="row"><label for="gtime" class="muted" style="flex:1">通知する時刻</label><input type="time" id="gtime" value="20:00" style="max-width:140px"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FERRY -->
+      <section class="view" id="v-ferry" aria-label="交通">
+        <div class="vt">船・バス・鉄道</div>
+        <div class="stack">
+          <div class="card">
+            <div class="row"><h3 style="margin:0">保戸島航路　本日の運航</h3><span class="pill p-ok" id="ferryPill2"><span class="dot"></span>通常運航</span></div>
+            <div class="muted" style="margin-top:4px" id="ferryMsg">10月3日 5:45 更新　LINE公式アカウントと同じ情報です</div>
+          </div>
+          <div class="card">
+            <div class="seg" role="group" aria-label="方向">
+              <button aria-pressed="true" data-dir="out">津久見港 → 保戸島</button>
+              <button aria-pressed="false" data-dir="in">保戸島 → 津久見港</button>
+            </div>
+            <div style="overflow-x:auto"><table class="tt" id="tt" style="margin-top:8px"></table></div>
+            <div class="muted" style="margin-top:6px">所要約25分。時刻はサンプルです。</div>
+          </div>
+          <div class="card">
+            <h3>市内バス・JR</h3>
+            <div class="list">
+              <div class="li"><div class="t">10:42</div><div class="b"><b>市内循環バス</b> 津久見駅前 → 市役所前<br><span class="pill p-ok" style="margin-top:4px">平常どおり</span></div></div>
+              <div class="li"><div class="t">10:51</div><div class="b"><b>JR日豊本線</b> 津久見 → 大分方面<br><span class="pill p-ok" style="margin-top:4px">平常どおり</span></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COUPON -->
+      <section class="view" id="v-coupon" aria-label="クーポン">
+        <div class="vt">地元のお店クーポン</div>
+        <div class="stack" id="cpList"></div>
+        <p class="muted" style="margin-top:12px">掲載クーポンは市が確認したものです。お店の方の登録は「もっと」→「お店の方へ」から。</p>
+      </section>
+
+      <!-- MORE -->
+      <section class="view" id="v-more" aria-label="もっと">
+        <div class="vt">もっと</div>
+        <div class="menu" id="moreMenu"></div>
+      </section>
+
+      <!-- sub views -->
+      <section class="view" id="v-doctor" aria-label="当番医">
+        <button class="back" data-go="more">‹ もっと</button>
+        <div class="vt">休日当番医・救急</div>
+        <div class="stack">
+          <div class="card">
+            <h3>10月4日（日）の当番医　9:00〜17:00</h3>
+            <div class="list">
+              <div class="li"><div class="b"><b>みなと内科クリニック</b>（内科）<br><span class="muted">津久見市中央町 ・ 電話</span> <span class="tel">0972-00-0000</span></div></div>
+              <div class="li"><div class="b"><b>さくら小児科</b>（小児科）<br><span class="muted">津久見市宮本町 ・ 電話</span> <span class="tel">0972-00-0001</span></div></div>
+            </div>
+          </div>
+          <div class="card" style="border-color:var(--bad)">
+            <h3 style="color:var(--bad)">迷ったときの相談先</h3>
+            <div class="list">
+              <div class="li"><div class="b">救急車・火事<br><span class="tel" style="color:var(--bad);font-size:1.5em">119</span></div></div>
+              <div class="li"><div class="b">救急安心センター（大人の急な病気）<br><span class="tel">#7119</span></div></div>
+              <div class="li"><div class="b">こども医療電話相談<br><span class="tel">#8000</span></div></div>
+            </div>
+            <button class="btn mk" style="margin-top:8px">119 に電話する</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="v-kids" aria-label="子育て">
+        <button class="back" data-go="more">‹ もっと</button>
+        <div class="vt">子育て・学校</div>
+        <div class="stack">
+          <div class="card">
+            <h3>お子さんの予定（例：1歳2か月）</h3>
+            <div class="list">
+              <div class="li"><div class="t">10/15</div><div class="b"><b>MR（麻しん風しん）1期</b><br><span class="muted">かかりつけ医で予約してください</span></div><span class="pill p-warn">予約前</span></div>
+              <div class="li"><div class="t">11/06</div><div class="b"><b>1歳6か月児健診</b><br><span class="muted">保健センター 13:00受付</span></div><span class="pill p-sea">案内済</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>学校からの連絡</h3>
+            <div class="list"><div class="li"><div class="t">10/02</div><div class="b">第一小学校：10月9日は運動会のため給食なし</div></div></div>
+          </div>
+          <button class="btn" data-go="apply">オンラインで手続きする</button>
+        </div>
+      </section>
+
+      <section class="view" id="v-apply" aria-label="電子申請">
+        <button class="back" data-go="more">‹ もっと</button>
+        <div class="vt">オンライン申請</div>
+        <div class="stack">
+          <input type="search" id="aq" placeholder="手続きをさがす（例：児童手当）" aria-label="手続きをさがす">
+          <div class="card"><div class="list" id="applyList"></div></div>
+          <div class="card" style="background:var(--sea-soft);border-color:transparent">
+            <h3 style="color:var(--sea)">マイナンバーカードで本人確認</h3>
+            <div class="muted">申請はマイナポータル（ぴったりサービス）で行います。カードを読み取れるスマホが必要です。</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="v-sns" aria-label="まちの話題">
+        <button class="back" data-go="more">‹ もっと</button>
+        <div class="vt">まちの話題</div>
+        <div class="card">
+          <div class="feed">
+            <div class="f"><span class="src">Instagram</span><div class="muted"><b style="color:var(--ink)">津久見市公式</b>　つくみイルカ島で秋の特別プログラムが始まりました</div></div>
+            <div class="f"><span class="src">観光NEWS</span><div class="muted"><b style="color:var(--ink)">観光協会</b>　10月の津久見観光NEWSを公開しました</div></div>
+            <div class="f"><span class="src">つくみみPod</span><div class="muted"><b style="color:var(--ink)">地域ラジオ</b>　第42回「保戸島のマグロ漁と港のくらし」<br><button class="btn ghost" style="margin-top:6px;min-height:44px;padding:8px">▶ 再生する（18分）</button></div></div>
+            <div class="f"><span class="src">YouTube</span><div class="muted"><b style="color:var(--ink)">津久見市チャンネル</b>　河津桜の植樹活動を紹介</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="v-visit" aria-label="観光">
+        <button class="back" data-go="more">‹ もっと</button>
+        <div class="vt" id="visitTitle">津久見を旅する</div>
+        <div class="stack">
+          <div class="seg" role="group" aria-label="言語">
+            <button aria-pressed="true" data-vl="ja">日本語</button><button aria-pressed="false" data-vl="en">EN</button><button aria-pressed="false" data-vl="ko">한국어</button><button aria-pressed="false" data-vl="zh">简体</button><button aria-pressed="false" data-vl="tw">繁體</button>
+          </div>
+          <div class="stack" id="spots"></div>
+        </div>
+      </section>
+
+      <section class="view" id="v-move" aria-label="移住">
+        <button class="back" data-go="more">‹ もっと</button>
+        <div class="vt">津久見に住む</div>
+        <div class="stack">
+          <div class="card"><h3>空き家バンク</h3><div class="big">登録物件 18件</div><div class="muted">海が見える平屋、保戸島の古民家など</div></div>
+          <div class="card"><h3>支援制度</h3><div class="list">
+            <div class="li"><div class="b"><b>移住支援金</b><br><span class="muted">要件を満たす世帯が対象</span></div></div>
+            <div class="li"><div class="b"><b>空き家改修補助</b><br><span class="muted">改修費の一部を補助</span></div></div>
+          </div></div>
+          <button class="btn">Uターン・移住の相談を予約</button>
+        </div>
+      </section>
+
+      <section class="view" id="v-shop" aria-label="お店の方へ">
+        <button class="back" data-go="more">‹ もっと</button>
+        <div class="vt">お店の方へ</div>
+        <div class="stack">
+          <div class="card">
+            <h3>港の食堂 しおさい　今月の実績</h3>
+            <div class="row" style="align-items:flex-end;gap:16px">
+              <div><div class="muted">表示</div><div class="big" style="font-variant-numeric:tabular-nums">1,284</div></div>
+              <div><div class="muted">利用</div><div class="big" style="font-variant-numeric:tabular-nums">86</div></div>
+              <div><div class="muted">利用率</div><div class="big" style="font-variant-numeric:tabular-nums">6.7%</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>新しいクーポンを出す</h3>
+            <div class="stack">
+              <div><label class="lb" for="sc1">内容</label><input type="search" id="sc1" value="平日ランチ ドリンク1杯無料"></div>
+              <div><label class="lb" for="sc2">有効期限</label><input type="search" id="sc2" value="2026年10月31日"></div>
+              <button class="btn mk" id="shopSubmit">市に掲載を申請する</button>
+              <div class="muted" id="shopMsg" hidden></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="v-settings" aria-label="設定">
+        <button class="back" data-go="more">‹ もっと</button>
+        <div class="vt">設定</div>
+        <div class="stack">
+          <div class="card"><h3>文字の大きさ</h3>
+            <div class="seg" role="group" aria-label="文字の大きさ" id="fsSeg"><button data-fs="0" aria-pressed="true">標準</button><button data-fs="1" aria-pressed="false">大</button><button data-fs="2" aria-pressed="false">特大</button></div>
+          </div>
+          <div class="card"><h3>届けてほしい情報</h3>
+            <div class="seg" role="group" aria-label="関心" style="flex-wrap:wrap">
+              <button aria-pressed="true" data-toggle>防災</button><button aria-pressed="true" data-toggle>ごみ</button><button aria-pressed="true" data-toggle>船</button><button aria-pressed="false" data-toggle>子育て</button><button aria-pressed="true" data-toggle>クーポン</button><button aria-pressed="false" data-toggle>イベント</button>
+            </div>
+            <div class="muted" style="margin-top:8px">防災の緊急情報は、設定にかかわらず届きます。</div>
+          </div>
+          <div class="card"><h3>個人情報について</h3><div class="muted">このアプリはお名前・住所を保存しません。登録するのは年代・地区・関心だけです。位置情報は道案内のときだけ使い、保存しません。</div></div>
+          <button class="btn ghost">LINEでログイン</button>
+        </div>
+      </section>
+
+      <nav class="tabbar" aria-label="メインメニュー">
+        <button class="tab" data-go="home" aria-current="true"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></svg><span data-i18n="nHome">ホーム</span></button>
+        <button class="tab" data-go="bousai"><svg viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17v.5"/></svg><span data-i18n="nBousai">防災</span></button>
+        <button class="tab" data-go="gomi"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span data-i18n="nGomi">ごみ</span></button>
+        <button class="tab" data-go="ferry"><svg viewBox="0 0 24 24"><path d="M3 17c3 2 6 2 9 0s6-2 9 0M5 14l1-5h12l1 5M9 9V5h6v4"/></svg><span data-i18n="nFerry">船・バス</span></button>
+        <button class="tab" data-go="more"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg><span data-i18n="nMore">もっと</span></button>
+      </nav>
+
+      <div id="overlay"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const screen=$('#screen');
+
+/* ---------- navigation ---------- */
+const tabOf={home:'home',bousai:'bousai',gomi:'gomi',ferry:'ferry',coupon:'home',more:'more',doctor:'more',kids:'more',apply:'more',sns:'more',visit:'more',move:'more',shop:'more',settings:'more'};
+function go(v){
+  $$('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
+  $$('.tab').forEach(t=>t.setAttribute('aria-current',t.dataset.go===tabOf[v]?'true':'false'));
+  const cur=$('#v-'+v); if(cur) cur.scrollTop=0;
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-go]'); if(b){go(b.dataset.go);}});
+
+/* ---------- requirement list ---------- */
+const reqs=[
+ ['F-101','防災・気象警報の通知','bousai',1],['F-102','ごみカレンダー・分別辞典','gomi',1],['F-103','ハザードマップ・避難所','bousai',1],
+ ['F-104','航路・バス／欠航情報','ferry',1],['F-902','多言語対応','visit',1],['F-901','通知の地区・関心設定','settings',1],
+ ['F-105','休日当番医・救急','doctor',2],['F-201','地元店舗クーポン','coupon',2],['F-205','SNS・地域ラジオ集約','sns',2],
+ ['F-301','電子申請','apply',2],['F-303','子育て・学校情報','kids',2],['F-401','観光マップ・多言語ガイド','visit',2],
+ ['F-403','移住・空き家バンク','move',2],['F-201','店舗側の登録・効果確認','shop',2]];
+$('#reqList').innerHTML=reqs.map(r=>`<li><button data-go="${r[2]}"><span class="id">${r[0]}</span><span>${r[1]}</span><span class="ph ph${r[3]}">P${r[3]}</span></button></li>`).join('');
+
+/* ---------- more menu ---------- */
+const ico={
+ doc:'<path d="M12 5v14M5 12h14"/><rect x="3" y="3" width="18" height="18" rx="4"/>',
+ kid:'<circle cx="12" cy="7" r="3"/><path d="M6 21v-3a6 6 0 0 1 12 0v3"/>',
+ app:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+ sns:'<path d="M4 18V8a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H9l-5 3z"/>',
+ map:'<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>',
+ home:'<path d="M3 11 12 4l9 7v9H3z"/><path d="M10 20v-5h4v5"/>',
+ shop:'<path d="M4 9h16l-1-5H5zM5 9v11h14V9"/><path d="M10 20v-5h4v5"/>',
+ set:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>'};
+const more=[['doctor','doc','休日当番医・救急','今日・明日の当番医と相談電話'],['kids','kid','子育て・学校','予防接種・健診・学校の連絡'],
+ ['apply','app','オンライン申請','窓口に行かずに手続き'],['sns','sns','まちの話題','SNS・観光NEWS・つくみみPod'],
+ ['visit','map','観光ガイド','Sightseeing / 관광 / 观光'],['move','home','津久見に住む','移住・空き家バンク'],
+ ['shop','shop','お店の方へ','クーポンの登録と効果の確認'],['settings','set','設定','文字の大きさ・通知・個人情報']];
+$('#moreMenu').innerHTML=more.map(m=>`<button class="mi" data-go="${m[0]}"><span class="mk"><svg viewBox="0 0 24 24">${ico[m[1]]}</svg></span><span><b>${m[2]}</b><span>${m[3]}</span></span><i class="chev"></i></button>`).join('');
+
+/* ---------- font size ---------- */
+const sizes=[['標準','16px'],['大','18.5px'],['特大','21px']]; let fsI=0;
+function setFs(i){fsI=i;screen.style.setProperty('--fs',sizes[i][1]);$('#btnFont').textContent='文字 '+sizes[i][0];
+  $$('#fsSeg button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.fs===i?'true':'false'));}
+$('#btnFont').onclick=()=>setFs((fsI+1)%3);
+$('#fsSeg').addEventListener('click',e=>{const b=e.target.closest('[data-fs]');if(b)setFs(+b.dataset.fs);});
+
+/* ---------- generic toggles ---------- */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-toggle]');if(b)b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');});
+
+/* ---------- i18n (UI labels) ---------- */
+const langs=['ja','en','ko','zh','tw'], langName={ja:'日本語',en:'English',ko:'한국어',zh:'简体',tw:'繁體'};
+const T={
+ greet:['おはようございます','Good morning','좋은 아침입니다','早上好','早安'],
+ ferryToday:['本日の保戸島航路','Hotojima Ferry today','오늘의 호토지마 항로','今日保户岛航线','今日保戶島航線'],
+ gomiTomorrow:['あすのごみ（中心部）','Tomorrow\'s garbage (Central)','내일의 쓰레기 (중심부)','明天的垃圾（中心区）','明天的垃圾（中心區）'],
+ tBousai:['防災・避難所','Disaster / Shelters','방재·대피소','防灾·避难所','防災·避難所'],
+ tGomi:['ごみ','Garbage','쓰레기','垃圾','垃圾'],tFerry:['船・バス','Ferry / Bus','배·버스','船·巴士','船·巴士'],
+ tDoctor:['当番医','Holiday clinics','당번 병원','值班医生','值班醫師'],tCoupon:['クーポン','Coupons','쿠폰','优惠券','優惠券'],
+ tKids:['子育て','Childcare','육아','育儿','育兒'],news:['お知らせ','News','공지','通知','公告'],
+ nHome:['ホーム','Home','홈','首页','首頁'],nBousai:['防災','Safety','방재','防灾','防災'],nGomi:['ごみ','Garbage','쓰레기','垃圾','垃圾'],
+ nFerry:['船・バス','Transit','교통','交通','交通'],nMore:['もっと','More','더보기','更多','更多']};
+let li=0;
+$('#btnLang').onclick=()=>{li=(li+1)%5;$('#btnLang').textContent=langName[langs[li]];
+  $$('[data-i18n]').forEach(el=>{const k=T[el.dataset.i18n];if(k)el.textContent=k[li];});setVisit(langs[li]);};
+
+/* ---------- hazard map ---------- */
+const hz={
+ flood:['<path d="M60 150c30-10 60-6 80 4s30 30 20 50H70c-20-10-26-40-10-54z" fill="var(--sea)" opacity=".35"/><path d="M90 170c20-4 40 0 50 10s6 24-10 30H95c-14-8-18-30-5-40z" fill="var(--sea)" opacity=".5"/>','色が濃い場所ほど浸水が深い想定です（洪水）。'],
+ slide:['<path d="M150 10l40 10-10 40-40-6z" fill="var(--warn)" opacity=".45"/><path d="M30 40l40-8 6 36-40 6z" fill="var(--warn)" opacity=".45"/><path d="M276 150l20 4-4 18-18-4z" fill="var(--warn)" opacity=".55"/>','橙色は土砂災害警戒区域です。'],
+ tsunami:['<path d="M200 88c-14 22-30 30-50 40-30 14-50 32-58 92h40c6-40 20-60 50-74 20-10 34-24 44-48z" fill="var(--bad)" opacity=".3"/><path d="M262 152c10-10 34-12 46 4l-6 6c-10-10-28-8-36 0z" fill="var(--bad)" opacity=".45"/>','赤い帯は津波で浸水が想定される沿岸部です。']};
+function setHz(k){$('#hzLayer').innerHTML=hz[k][0];$('#hzNote').textContent=hz[k][1];
+  $$('[data-hz]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.hz===k?'true':'false'));}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-hz]');if(b)setHz(b.dataset.hz);});
+setHz('flood');
+
+/* ---------- garbage ---------- */
+const sched={ // weekday -> type  (0=Sun)
+ center:{burn:[1,4],pla:[3],can:'1st3rd6',paper:'2nd4th6'},
+ aoe:{burn:[2,5],pla:[3],can:'1st3rd6',paper:'2nd4th6'},
+ hishiro:{burn:[2,5],pla:[1],can:'2nd4th6',paper:'1st3rd6'},
+ yotsuura:{burn:[1,4],pla:[5],can:'2nd4th6',paper:'1st3rd6'},
+ hotojima:{burn:[2,5],pla:[3],can:'1st3rd1',paper:'2nd4th1'}};
+const lab={burn:['燃やせる','g-burn'],pla:['プラ','g-pla'],can:['かん・びん','g-can'],paper:['古紙','g-paper']};
+function nth(d){return Math.ceil(d/7);}
+function typeOn(dist,date){
+  const s=sched[dist],wd=date.getDay(),n=nth(date.getDate());const out=[];
+  if(s.burn.includes(wd))out.push('burn'); if(s.pla.includes(wd))out.push('pla');
+  for(const k of['can','paper']){const m=s[k].match(/(\d)\w\w(\d)\w\w(\d)/);if(+m[3]===wd&&(n==+m[1]||n==+m[2]))out.push(k);}
+  return out;}
+function drawCal(){
+  const dist=$('#district').value,first=new Date(2026,9,1),days=31;
+  let h=['日','月','火','水','木','金','土'].map((d,i)=>`<div class="h ${i==0?'sun':i==6?'sat':''}">${d}</div>`).join('');
+  for(let i=0;i<first.getDay();i++)h+='<div></div>';
+  for(let d=1;d<=days;d++){const dt=new Date(2026,9,d);const t=typeOn(dist,dt);
+    h+=`<div class="d ${d===3?'today':''}">${d}${t.map(k=>`<i class="${lab[k][1]}">${lab[k][0]}</i>`).join('')}</div>`;}
+  $('#cal').innerHTML=h;$('#calDist').textContent=$('#district').selectedOptions[0].text.replace(/（.*/,'');}
+$('#district').onchange=drawCal;drawCal();
+
+const items=[['乾電池','かんでんち','有害ごみ','g-can','透明な袋に入れて、かん・びんの日に'],['ペットボトル','ぺっとぼとる','プラ','g-pla','キャップとラベルを外して軽くすすぐ'],
+ ['スプレー缶','すぷれーかん','かん・びん','g-can','中身を使い切ってから。穴あけ不要'],['生ごみ','なまごみ','燃やせる','g-burn','水を切って指定袋へ'],
+ ['新聞','しんぶん','古紙','g-paper','ひもで十字にしばる'],['段ボール','だんぼーる','古紙','g-paper','たたんでひもでしばる'],
+ ['発泡スチロール','はっぽうすちろーる','プラ','g-pla','汚れを落として出す'],['蛍光灯','けいこうとう','有害ごみ','g-can','割らずに購入時のケースへ'],
+ ['魚のアラ','さかなのあら','燃やせる','g-burn','新聞紙に包んで水を切る'],['みかんの皮','みかんのかわ','燃やせる','g-burn','よく乾かすと臭いが減ります'],
+ ['ビールびん','びーるびん','かん・びん','g-can','お店への返却もできます'],['釣り糸','つりいと','燃やせる','g-burn','針は外して紙に包む']];
+const kata2hira=s=>s.replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60));
+function gsearch(){const q=kata2hira($('#gq').value.trim());
+  const r=q?items.filter(i=>i[0].includes(q)||i[1].includes(q)||kata2hira(i[0]).includes(q)):items.slice(0,3);
+  $('#gres').innerHTML=(q?'':'<div class="muted">よく調べられる品目</div>')+(r.length?r.map(i=>`<div class="r"><div style="min-width:0"><b>${i[0]}</b><br><span class="muted">${i[4]}</span></div><span class="legend"><span class="${i[3]}">${i[2]}</span></span></div>`).join(''):'<div class="muted">見つかりませんでした。別の言い方（例：「でんち」）で探すか、環境保全課へお問い合わせください。</div>');}
+$('#gq').addEventListener('input',gsearch);gsearch();
+
+/* ---------- ferry ---------- */
+const tt={out:['6:50','8:40','10:30','13:10','15:30','17:40'],in:['6:10','7:50','9:40','12:20','14:40','16:50']};
+let cancelled=false,dir='out';
+function addMin(t,m){let[h,mm]=t.split(':').map(Number);mm+=m;h+=Math.floor(mm/60);mm%=60;return h+':'+String(mm).padStart(2,'0');}
+function drawTT(){const nowMin=10*60+5;
+  let nextFound=false;
+  $('#tt').innerHTML='<tr><th>出港</th><th>到着</th><th>状況</th></tr>'+tt[dir].map(t=>{const[h,m]=t.split(':').map(Number);const past=h*60+m<nowMin;let cls='';
+    if(!past&&!nextFound){cls='next';nextFound=true;}
+    const st=cancelled&&!past?'<span class="pill p-bad">欠航</span>':past?'<span class="muted">出港済</span>':'<span class="pill p-ok">運航</span>';
+    return `<tr class="${cls}"><td>${t}</td><td>${addMin(t,25)}</td><td>${st}</td></tr>`;}).join('');}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-dir]');if(!b)return;dir=b.dataset.dir;$$('[data-dir]').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));drawTT();});
+drawTT();
+function setCancel(){cancelled=true;
+  $('#ferryState').textContent='午後の便 欠航';$('#ferryPill').className='pill p-bad';$('#ferryPill').innerHTML='<span class="dot"></span>欠航あり';
+  $('#ferryPill2').className='pill p-bad';$('#ferryPill2').innerHTML='<span class="dot"></span>13:10以降 欠航';
+  $('#ferryMsg').textContent='10月3日 10:05 更新　波が高いため13:10以降の便は欠航します';drawTT();}
+
+/* ---------- coupons ---------- */
+const cps=[['港の食堂 しおさい','ひゅうが丼 100円引き','10月31日まで','食','var(--sea)'],['青江みかん園 直売所','みかん 1袋増量','11月30日まで','柑','var(--mikan)'],
+ ['ベーカリー 千怒','パン3個で1個サービス','10月15日まで','パ','#8a6a3c'],['湯処 つくみ','入浴料 50円引き','10月31日まで','湯','#4b7a8f'],
+ ['保戸島 まぐろ屋','まぐろ漬け丼 大盛り無料','10月20日まで','鮪','#a8443a']];
+const used=new Set();
+function drawCp(){$('#cpList').innerHTML=cps.map((c,i)=>`<button class="cp ${used.has(i)?'used':''}" data-cp="${i}"><span class="ic" style="background:${c[4]}">${c[3]}</span><span style="min-width:0"><span class="nm">${c[0]}</span><br><span class="of">${c[1]}</span><br><span class="muted">${used.has(i)?'使用済み':c[2]}</span></span></button>`).join('');}
+drawCp();
+const ov=$('#overlay');
+document.addEventListener('click',e=>{const b=e.target.closest('[data-cp]');if(!b)return;const i=+b.dataset.cp,c=cps[i];
+  if(used.has(i))return;
+  ov.innerHTML=`<div class="sheet" id="sh"><div class="in">
+    <div class="muted" style="text-align:center">この画面をお店の方に見せてください</div>
+    <div style="text-align:center;background:var(--mikan-soft);border-radius:16px;padding:20px 12px">
+      <div class="big">${c[0]}</div><div class="big" style="color:var(--mikan);font-size:1.6em;margin-top:6px">${c[1]}</div>
+      <div class="muted" style="margin-top:6px">${c[2]}</div></div>
+    <div id="cfm"><button class="btn mk" id="useBtn">お店の方が押してください：使用する</button></div>
+    <button class="btn ghost" id="closeSh">閉じる</button></div></div>`;
+  $('#closeSh').onclick=()=>ov.innerHTML='';
+  $('#useBtn').onclick=()=>{$('#cfm').innerHTML=`<div class="muted" style="text-align:center;margin-bottom:8px">使用済みにすると元に戻せません。よろしいですか？</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn ghost" id="no">やめる</button><button class="btn mk" id="yes">使用済みにする</button></div>`;
+    $('#no').onclick=()=>ov.innerHTML='';$('#yes').onclick=()=>{used.add(i);drawCp();ov.innerHTML='';};};
+});
+
+/* ---------- shop ---------- */
+$('#shopSubmit').onclick=()=>{const m=$('#shopMsg');m.hidden=false;m.textContent='申請しました。市の確認後（通常2営業日）に掲載されます。';};
+
+/* ---------- apply ---------- */
+const procs=[['児童手当の認定請求','子育て'],['妊娠の届出','子育て'],['保育所の入所申込','子育て'],['転入・転出の予約','引越し'],['介護保険 要介護認定の申請','介護'],['罹災証明書の申請','防災']];
+function drawApply(){const q=$('#aq').value.trim();$('#applyList').innerHTML=procs.filter(p=>!q||p[0].includes(q)||p[1].includes(q)).map(p=>`<div class="li"><div class="b"><b>${p[0]}</b></div><span class="pill p-sea">${p[1]}</span></div>`).join('')||'<div class="muted">該当する手続きがありません。市役所 総務課へご相談ください。</div>';}
+$('#aq').addEventListener('input',drawApply);drawApply();
+
+/* ---------- visit multilingual ---------- */
+const V={
+ ja:['津久見を旅する',[['つくみイルカ島','イルカとのふれあい体験。予約がおすすめです'],['保戸島','津久見港から船で25分。路地とコンクリート3階建ての家並み'],['四浦半島の河津桜','2月上旬から早咲きの桜が半島を彩ります']]],
+ en:['Explore Tsukumi',[['Tsukumi Dolphin Island','Meet the dolphins up close. Booking recommended'],['Hotojima Island','25 minutes by ferry from Tsukumi Port. Narrow lanes and three-story houses'],['Kawazu cherry blossoms, Yotsuura','Early blossoms line the peninsula from early February']]],
+ ko:['쓰쿠미 여행',[['쓰쿠미 돌고래섬','돌고래와 교감하는 체험. 예약을 권장합니다'],['호토지마','쓰쿠미항에서 배로 25분. 골목과 3층 집이 이어지는 섬'],['요쓰우라 반도의 가와즈 벚꽃','2월 초부터 이른 벚꽃이 반도를 물들입니다']]],
+ zh:['畅游津久见',[['津久见海豚岛','与海豚近距离互动，建议提前预约'],['保户岛','从津久见港乘船25分钟，小巷与三层民居相连'],['四浦半岛河津樱','2月上旬起早开的樱花点缀半岛']]],
+ tw:['暢遊津久見',[['津久見海豚島','與海豚近距離互動，建議提前預約'],['保戶島','從津久見港搭船25分鐘，小巷與三層民居相連'],['四浦半島河津櫻','2月上旬起早開的櫻花點綴半島']]]};
+function setVisit(l){$('#visitTitle').textContent=V[l][0];$('#spots').innerHTML=V[l][1].map((s,i)=>`<div class="card"><div class="row"><div class="big" style="font-size:1.1em">${s[0]}</div><span class="pill p-sea">${['体験','島','季節'][i]}</span></div><div class="muted" style="margin-top:6px">${s[1]}</div></div>`).join('');
+  $$('[data-vl]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.vl===l?'true':'false'));}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-vl]');if(b)setVisit(b.dataset.vl);});
+setVisit('ja');
+
+/* ---------- push demos ---------- */
+let tId;
+function toast(title,body,color){clearTimeout(tId);const el=document.createElement('div');el.className='toast';el.style.borderLeftColor=color;
+  el.innerHTML=`<div class="ap">つくみ</div><div><b>${title}</b><div class="muted">${body}</div></div>`;
+  $$('.toast').forEach(t=>t.remove());screen.appendChild(el);tId=setTimeout(()=>el.remove(),6000);el.onclick=()=>el.remove();}
+$('#demoAlert').onclick=()=>{toast('【避難指示】津久見市 四浦地区','土砂災害の危険が高まっています。すぐに市民会館へ避難してください。','var(--bad)');
+  $('#homeAlert').innerHTML='<div><b style="color:var(--bad)">避難指示</b>　四浦地区</div><div class="muted">10月3日 10:05 発令。近くの避難所へ移動してください。</div>';$('#homeAlert').style.borderColor='var(--bad)';$('#homeAlert').style.background='var(--bad-soft)';};
+$('#demoFerry').onclick=()=>{toast('保戸島航路 欠航のお知らせ','波が高いため、13:10以降の便は欠航します。','var(--warn)');setCancel();};
+$('#demoGarbage').onclick=()=>toast('あすは「燃やせるごみ」の日です','中心部　朝8時30分までに集積所へ','var(--sea)');
+})();
+</script>
+
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
+</script>
+</body>
+</html>

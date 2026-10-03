@@ -1,0 +1,17 @@
+{
+  "name": "つくみアプリ（サンプル）",
+  "short_name": "つくみ",
+  "description": "津久見市 専用アプリのサンプル版。防災・ごみ・航路・クーポンなどの画面を確認できます。",
+  "lang": "ja",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f4f1",
+  "theme_color": "#0d5c73",
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "./icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
